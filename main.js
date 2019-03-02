@@ -4,23 +4,11 @@ var canvasEl;
 var ctx;
 var circles = {
   arr: [],
-  draw: function(circle) {
+  draw: function() {
     ctx.beginPath();
     ctx.fillStyle = "#000000";
-    ctx.arc(circle.x, circle.y, circle.radius, 0, 2 * Math.PI, true);
+    ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, true);
     ctx.fill();
-    ctx.beginPath();
-    ctx.arc(
-      circle.x + circle.radius / 5,
-      circle.y - circle.radius / 5,
-      circle.radius / 5,
-      0,
-      2 * Math.PI,
-      true
-    );
-    ctx.fillStyle = "#808080";
-    ctx.fill();
-    ctx.fillStyle = "#000000";
     ctx.closePath();
   },
   create: function(specs) {
@@ -37,53 +25,40 @@ var circles = {
       // circle.y = circle.r + Math.random() * (ctx.width - 2 * circle.r);
       circle.x = 100;
       circle.y = 100;
-      circle.vx = Math.random() * 20;
-      circle.vy = Math.random() * 20;
+      circle.vx = Math.random() * 20 - 10;
+      circle.vy = Math.random() * 20 - 10;
     }
     this.arr.push(circle);
   },
-  move: function(circle) {
-    if (circle.x + circle.r > ctx.width || circle.x - circle.r < 0) {
-      circle.vx = -circle.vx;
+  move: function() {
+    if (this.x + this.r >= ctx.canvas.width || this.x - this.r < 0) {
+      this.vx = -this.vx;
     }
-    if (circle.y + circle.r > ctx.height || circle.x - circle.r < 0) {
-      circle.vy = -circle.vy;
+    if (this.y + this.r >= ctx.canvas.height || this.y - this.r < 0) {
+      this.vy = -this.vy;
     }
-    circle.x += circle.vx;
-    circle.y += circle.vy;
+    this.x += this.vx;
+    this.y += this.vy;
   }
 };
 
 function drawLoop() {
-  // canvasEl.style.background =
-  //   (canvasEl.style.background  != "black") ? "black" : "white";
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, canvasEl.width, canvasEl.height);
+  ctx.beginPath();
+  ctx.fillStyle = "#000000";
+  ctx.arc(circles.arr[0].x, circles.arr[0].y, circles.arr[0].r, 0, 2 * Math.PI, true);
+  ctx.fill();
   circles.arr.forEach(circle => {
-    circles.draw(circle);
-  });
-  circles.arr.forEach(circle => {
-    circles.move(circle);
+    circle.move();
+    //circle.draw();
   });
 }
 
 function initJS() {
-  mainTimer = setInterval(drawLoop, 1000);
+  mainTimer = setInterval(drawLoop, 20);
 
   canvasEl = document.getElementById("el");
   ctx = canvasEl.getContext("2d");
   circles.create();
-  // circle = {
-  //   x: canvasEl.width / 2,
-  //   y: canvasEl.height / 2,
-  //   vx: 10,
-  //   vy: 20,
-  //   r: 40,
-  //   move: function() {
-  //         earase(ctx, circle);
-  //         circle.x += circle.vx;
-  //         circle.y += circle.vy;
-  //         draw(ctx, circle);
-  //     }
-  // };
 }
