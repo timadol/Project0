@@ -6,9 +6,9 @@ var then = new Date();
 var deltatime;
 var ctx;
 var GRAVITY = 0;
-var VELOCITY = 30;
-var RADIUS = 20;
-var TIME_MULTIPLIER = 1;
+var VELOCITY = 20;
+var RADIUS = 50;
+var TIME_MULTIPLIER = 30;
 var vector = {
   dotProduct: function(vector1, vector2) {
     var result = 0;
@@ -89,7 +89,8 @@ var circles = {
       circle.vel.x = Math.random() * VELOCITY * 2 - VELOCITY;
       circle.vel.y = Math.random() * VELOCITY * 2 - VELOCITY;
     }
-    circle.mass = (2 * Math.PI * Math.pow(circle.r, 2));
+    circle.mass = 2 * Math.PI * Math.pow(circle.r, 2);
+    circle.justColidedWith = NaN;
     this.arr.push(circle);
   },
 
@@ -106,29 +107,45 @@ var circles = {
     if (this.pos.y - this.r < 0 && this.vel.y < 0) {
       this.vel.y = -this.vel.y;
     }
-    
+
     this.pos.x += (this.vel.x * deltatime) / 100;
     this.pos.y += (this.vel.y * deltatime) / 100;
     this.vel.y += (GRAVITY * deltatime) / 100;
   },
 
-  collisionDetector: function () {
+  collisionDetector: function() {
     for (let i = 0; i < this.arr.length; i++) {
-      for (let j = i+1; j < this.arr.length; j++) {
+      for (let j = i + 1; j < this.arr.length; j++) {
         var temp1 = this.arr[i];
         var temp2 = this.arr[j];
-        var vec = vector.subtract(temp1.pos,temp2.pos);
+        var vec = vector.subtract(temp1.pos, temp2.pos);
         var distance = Math.sqrt(vec.lenghtSqr());
-        if(distance < (temp1.r + temp2.r)){
-          this.collisionHandler(temp1, temp2);
-        }        
-     }
+        if (distance < temp1.r + temp2.r) {
+          if (j != temp1.justColidedWith) {
+            console.log("Detected " + i + " with " + j + " delta time " + (new Date()).getSeconds());
+            this.collisionHandler(temp1, temp2);
+            temp1.justColidedWith = j;
+            
+          }
+          break;
+        }
+        temp1.justColidedWith = NaN;
+      }
     }
   },
 
   collisionHandler: function(circle1, circle2) {
     var normalVect = Object.create(vector);
     normalVect = vector.subtract(circle1.pos, circle2.pos);
+
+    var massCenterVect = Object.create(vector);
+    massCenterVect = vector.multyply(
+      vector.summ(
+        vector.multyply(circle1.pos, circle1.mass),
+        vector.multyply(circle2.pos, circle2.mass)
+      ),
+      1 / (circle1.mass + circle2.mass)
+    );
 
     var normalVel1 = Object.create(vector);
     normalVel1.x =
@@ -157,18 +174,38 @@ var circles = {
       (2 * circle1.mass * Math.sqrt(normalVel1.lenghtSqr()) +
         (circle2.mass - circle1.mass) * Math.sqrt(normalVel2.lenghtSqr())) /
       (circle1.mass + circle2.mass);
-    normalVel1 = vector.multyply(normalVel1,(vel1/Math.sqrt(normalVel1.lenghtSqr())));
-    normalVel2 = vector.multyply(normalVel2,(vel2/Math.sqrt(normalVel2.lenghtSqr())));
+    normalVel1 = vector.multyply(
+      normalVel1,
+      vel1 / Math.sqrt(normalVel1.lenghtSqr())
+    );
+    normalVel2 = vector.multyply(
+      normalVel2,
+      vel2 / Math.sqrt(normalVel2.lenghtSqr())
+    );
 
     circle1.vel = vector.summ(circle1.vel, normalVel1);
     circle2.vel = vector.summ(circle2.vel, normalVel2);
+    // circle1.pos = vector.summ(
+    //   massCenterVect,
+    //   vector.multyply(
+    //     normalVect,
+    //     circle1.r / Math.sqrt(normalVect.lenghtSqr())
+    //   )
+    // );
+    // circle2.pos = vector.summ(
+    //   massCenterVect,
+    //   vector.multyply(
+    //     normalVect,
+    //     -circle2.r / Math.sqrt(normalVect.lenghtSqr())
+    //   )
+    // );
   }
 };
 
 function drawLoop() {
   now = then;
   then = new Date();
-  deltatime = (+then - +now)*TIME_MULTIPLIER;
+  deltatime = TIME_MULTIPLIER;
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, canvasEl.width, canvasEl.height);
   ctx.fill();
@@ -187,7 +224,7 @@ function initJS() {
 
   canvasEl = document.getElementById("el");
   ctx = canvasEl.getContext("2d");
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 2; i++) {
     circles.create();
   }
 }
