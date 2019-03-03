@@ -118,25 +118,14 @@ var circles = {
   collisionDetector: function () {
     for (let i = 0; i < this.arr.length; i++) {
       for (let j = i + 1; j < this.arr.length; j++) {
-        // var temp1 = this.arr[i];
-        // var temp2 = this.arr[j];
-        var x1 = this.arr[i].pos.x;
-        var x2 = this.arr[j].pos.x
-        var y1 = this.arr[i].pos.y
-        var y2 = this.arr[j].pos.y
-        var r1 = this.arr[i].r;
-        var r2 = this.arr[j].r;
-        if (((x1 + r1) > (x2 - r2) ||
-            (x2 + r2) > (x1 - r1)) &&
-          ((y1 + r1) > (y2 - r2) ||
-            (y2 + r2) > (y1 - r1))
-        ) {
-
-          var deltaX = (x1 - x2);
-          var deltaY = (y1 - y2);
+        var temp1 = this.arr[i];
+        var temp2 = this.arr[j];
+        var deltaX = Math.abs((temp1.pos.x - temp2.pos.x));
+        var deltaY = Math.abs((temp1.pos.y - temp2.pos.y));
+        if ((deltaX < (temp1.r + temp2.r) && (deltaY < (temp1.r + temp2.r)))) {
           var distance = deltaX * deltaX + deltaY * deltaY;
-          if (distance < (r1 + r2) * (r1 + r2)) {
-            this.collisionHandler(this.arr[i], this.arr[j]);
+          if (distance < (temp1.r + temp2.r) * (temp1.r + temp2.r)) {
+            this.collisionHandler(temp1, temp2);
           }
         }
       }
@@ -189,8 +178,8 @@ var circles = {
     //Проекции скоростей
     var totalMass = circle1.mass + circle2.mass;
     var diffMass = circle1.mass - circle2.mass;
-    var vel11 = (2 * circle2.mass * vel2 - diffMass * vel1) / totalMass;
-    var vel21 = (2 * circle1.mass * vel1 + diffMass * vel2) / totalMass;
+    var vel11 = (2 * circle2.mass * vel2 + diffMass * vel1) / totalMass;
+    var vel21 = (2 * circle1.mass * vel1 - diffMass * vel2) / totalMass;
 
     normalVel1 = vector.multyply(normalVect, vel11);
     normalVel2 = vector.multyply(normalVect, vel21);
@@ -294,14 +283,22 @@ function resetScene() {
   for (let i = 0; i < SliderValue; i++) {
     circles.create();
   }
+  //   circles.create({
+  //     x: 300,
+  //     y: 200,
+  //     vy: 0,
+  //     vx: -10,
+  //     r: 20
+  //   });
+  //   circles.create({
+  //   x: 20,
+  //   y: 200,
+  //   vy: 0,
+  //   vx: 10,
+  //   r: 14
+  // });
 }
-// circles.create({
-//   x: 300,
-//   y: 238,
-//   vy: 0,
-//   vx: -10,
-//   r: 20
-// });
+
 // circles.create({
 //   x: 20,
 //   y: 200,
