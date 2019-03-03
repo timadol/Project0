@@ -7,13 +7,13 @@ var now = new Date();
 var then = new Date();
 var deltatime;
 var ctx;
-var gravity = 1;
+var gravity = 0.2;
 var VELOCITY = 10;
-var radius = 2;
+var radius = 0.5;
 var TIME_MULTIPLIER = 1 / 2;
 var K_BOLCMAN = 1.38064852e-38;
 
-var SliderValue = 0;
+var SliderValue = 4000;
 
 function rgbToHex(R, G, B) {
   return "#" + toHex(R) + toHex(G) + toHex(B)
@@ -118,13 +118,26 @@ var circles = {
   collisionDetector: function () {
     for (let i = 0; i < this.arr.length; i++) {
       for (let j = i + 1; j < this.arr.length; j++) {
-        var temp1 = this.arr[i];
-        var temp2 = this.arr[j];
-        var deltaX = (temp1.pos.x - temp2.pos.x);
-        var deltaY = (temp1.pos.y - temp2.pos.y);
-        var distance = deltaX * deltaX + deltaY * deltaY;
-        if (distance < (temp1.r + temp2.r) * (temp1.r + temp2.r)) {
-          this.collisionHandler(temp1, temp2);
+        // var temp1 = this.arr[i];
+        // var temp2 = this.arr[j];
+        var x1 = this.arr[i].pos.x;
+        var x2 = this.arr[j].pos.x
+        var y1 = this.arr[i].pos.y
+        var y2 = this.arr[j].pos.y
+        var r1 = this.arr[i].r;
+        var r2 = this.arr[j].r;
+        if (((x1 + r1) > (x2 - r2) ||
+            (x2 + r2) > (x1 - r1)) &&
+          ((y1 + r1) > (y2 - r2) ||
+            (y2 + r2) > (y1 - r1))
+        ) {
+
+          var deltaX = (x1 - x2);
+          var deltaY = (y1 - y2);
+          var distance = deltaX * deltaX + deltaY * deltaY;
+          if (distance < (r1 + r2) * (r1 + r2)) {
+            this.collisionHandler(this.arr[i], this.arr[j]);
+          }
         }
       }
     }
@@ -209,13 +222,13 @@ function drawLoop() {
     totalEnergy += tempEng;
     circle.move();
     circle.draw();
-    // Вывод отладочной информации
-    ctx.fillStyle = "#000000";
-    ctx.fillText("Энергия: " + Math.round(totalEnergy), 5, 10);
-    ctx.fillText("Кол-во: " + circles.arr.length, 5, 20);
-    ctx.fillText("FPS: " + Math.round(1000 / (then - now)), 5, 30);
-    ctx.fillText("T: " + Math.round(totalKineticEnergy / (10 * SliderValue)), 5, 40);
   });
+  // Вывод отладочной информации
+  ctx.fillStyle = "#000000";
+  ctx.fillText("Энергия: " + Math.round(totalEnergy), 5, 10);
+  ctx.fillText("Кол-во: " + circles.arr.length, 5, 20);
+  ctx.fillText("FPS: " + Math.round(1000 / (then - now)), 5, 30);
+  ctx.fillText("T: " + Math.round(totalKineticEnergy / (10 * SliderValue)), 5, 40);
 }
 
 
@@ -223,7 +236,6 @@ function drawLoop() {
 function initJS() {
   canvasEl = document.getElementById("el");
   mainTimer = setInterval(drawLoop, 20);
-  SliderValue = 300;
   $("#countSlider-value").html(SliderValue);
   resetScene();
 
