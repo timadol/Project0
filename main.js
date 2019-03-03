@@ -6,9 +6,9 @@ var then = new Date();
 var deltatime;
 var ctx;
 var GRAVITY = 0;
-var VELOCITY = 20;
-var RADIUS = 50;
-var TIME_MULTIPLIER = 30;
+var VELOCITY = 10;
+var RADIUS = 10;
+var TIME_MULTIPLIER = 20;
 var vector = {
   dotProduct: function(vector1, vector2) {
     var result = 0;
@@ -58,6 +58,14 @@ var vector = {
       }
     }
     return result;
+  },
+  normalize: function() {
+    var result = 0;
+    for (i in this) {
+      if (this.hasOwnProperty(i)) {
+        this[i] = this[i] / Math.sqrt(this.lenghtSqr());
+      }
+    }
   }
 };
 var circles = {
@@ -77,8 +85,8 @@ var circles = {
     if (specs) {
       circle.pos.x = specs.x;
       circle.pos.y = specs.y;
-      circle.vel.x = specs.vel.x;
-      circle.vel.y = specs.vel.y;
+      circle.vel.x = specs.vx;
+      circle.vel.y = specs.vy;
       circle.r = specs.r;
     } else {
       circle.r = Math.random() * RADIUS * 2 + RADIUS;
@@ -89,7 +97,7 @@ var circles = {
       circle.vel.x = Math.random() * VELOCITY * 2 - VELOCITY;
       circle.vel.y = Math.random() * VELOCITY * 2 - VELOCITY;
     }
-    circle.mass = 2 * Math.PI * Math.pow(circle.r, 2);
+    circle.mass = Math.PI * Math.pow(circle.r, 2);
     circle.justColidedWith = NaN;
     this.arr.push(circle);
   },
@@ -121,15 +129,8 @@ var circles = {
         var vec = vector.subtract(temp1.pos, temp2.pos);
         var distance = Math.sqrt(vec.lenghtSqr());
         if (distance < temp1.r + temp2.r) {
-          if (j != temp1.justColidedWith) {
-            console.log("Detected " + i + " with " + j + " delta time " + (new Date()).getSeconds());
-            this.collisionHandler(temp1, temp2);
-            temp1.justColidedWith = j;
-            
-          }
-          break;
+          this.collisionHandler(temp1, temp2);
         }
-        temp1.justColidedWith = NaN;
       }
     }
   },
@@ -137,68 +138,59 @@ var circles = {
   collisionHandler: function(circle1, circle2) {
     var normalVect = Object.create(vector);
     normalVect = vector.subtract(circle1.pos, circle2.pos);
+    var distance = Math.sqrt(normalVect.lenghtSqr());
+    normalVect.normalize();
 
-    var massCenterVect = Object.create(vector);
-    massCenterVect = vector.multyply(
-      vector.summ(
-        vector.multyply(circle1.pos, circle1.mass),
-        vector.multyply(circle2.pos, circle2.mass)
-      ),
-      1 / (circle1.mass + circle2.mass)
+    //overlap resolving
+    circle1.pos = vector.summ(
+      circle1.pos,
+      vector.multyply(
+        normalVect,
+        (-(distance - circle1.r - circle2.r) * circle1.mass) /
+          (circle1.mass + circle2.mass)
+      )
+    );
+    circle2.pos = vector.summ(
+      circle2.pos,
+      vector.multyply(
+        normalVect,
+        ((distance - circle1.r - circle2.r) * circle2.mass) /
+          (circle1.mass + circle2.mass)
+      )
     );
 
     var normalVel1 = Object.create(vector);
-    normalVel1.x =
-      (vector.dotProduct(circle1.vel, normalVect) / normalVect.lenghtSqr()) *
-      normalVect.x;
-    normalVel1.y =
-      (vector.dotProduct(circle1.vel, normalVect) / normalVect.lenghtSqr()) *
-      normalVect.y;
+    normalVel1 = vector.multyply(
+      normalVect,
+      vector.dotProduct(circle1.vel, normalVect)
+    );
 
     var normalVel2 = Object.create(vector);
-    normalVel2.x =
-      (vector.dotProduct(circle2.vel, normalVect) / normalVect.lenghtSqr()) *
-      normalVect.x;
-    normalVel2.y =
-      (vector.dotProduct(circle2.vel, normalVect) / normalVect.lenghtSqr()) *
-      normalVect.y;
+    normalVel2 = vector.multyply(
+      normalVect,
+      vector.dotProduct(circle2.vel, normalVect)
+    );
 
     circle1.vel = vector.subtract(circle1.vel, normalVel1);
     circle2.vel = vector.subtract(circle2.vel, normalVel2);
 
-    var vel1 =
-      (2 * circle2.mass * Math.sqrt(normalVel2.lenghtSqr()) +
-        (circle1.mass - circle2.mass) * Math.sqrt(normalVel1.lenghtSqr())) /
-      (circle1.mass + circle2.mass);
-    var vel2 =
-      (2 * circle1.mass * Math.sqrt(normalVel1.lenghtSqr()) +
-        (circle2.mass - circle1.mass) * Math.sqrt(normalVel2.lenghtSqr())) /
-      (circle1.mass + circle2.mass);
-    normalVel1 = vector.multyply(
-      normalVel1,
-      vel1 / Math.sqrt(normalVel1.lenghtSqr())
-    );
-    normalVel2 = vector.multyply(
-      normalVel2,
-      vel2 / Math.sqrt(normalVel2.lenghtSqr())
-    );
+    var vel1 = vector.dotProduct(normalVel1, normalVect);
+    var vel2 = -vector.dotProduct(normalVel2, normalVect);
 
-    circle1.vel = vector.summ(circle1.vel, normalVel1);
-    circle2.vel = vector.summ(circle2.vel, normalVel2);
-    // circle1.pos = vector.summ(
-    //   massCenterVect,
-    //   vector.multyply(
-    //     normalVect,
-    //     circle1.r / Math.sqrt(normalVect.lenghtSqr())
-    //   )
-    // );
-    // circle2.pos = vector.summ(
-    //   massCenterVect,
-    //   vector.multyply(
-    //     normalVect,
-    //     -circle2.r / Math.sqrt(normalVect.lenghtSqr())
-    //   )
-    // );
+    
+
+    var temp;
+    var totalMass = circle1.mass + circle2.mass;
+    var diffMass = circle1.mass - circle2.mass;
+    temp = (2 * circle2.mass * vel2 - diffMass * vel1) / totalMass;
+    vel2 = (2 * circle1.mass * vel1 + diffMass * vel2) / totalMass;
+    vel1 = temp;
+
+    normalVel1 = vector.multyply(normalVect, vel1);
+    normalVel2 = vector.multyply(normalVect, vel2);
+
+    circle1.vel = vector.subtract(circle1.vel, normalVel1);
+    circle2.vel = vector.subtract(circle2.vel, normalVel2);
   }
 };
 
@@ -208,7 +200,8 @@ function drawLoop() {
   deltatime = TIME_MULTIPLIER;
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, canvasEl.width, canvasEl.height);
-  ctx.fill();
+  //ctx.fill();
+  ctx.strokeRect(0, 0, canvasEl.width, canvasEl.height);
   circles.collisionDetector();
   circles.arr.forEach(circle => {
     circle.move();
@@ -224,7 +217,22 @@ function initJS() {
 
   canvasEl = document.getElementById("el");
   ctx = canvasEl.getContext("2d");
-  for (let i = 0; i < 2; i++) {
-    circles.create();
-  }
+  // for (let i = 0; i < 3; i++) {
+  //   circles.create();
+  // }
+
+  circles.create({
+    x: 300,
+    y: 200,
+    vy: 0,
+    vx: 1,
+    r: 20
+  });
+  circles.create({
+    x: 50,
+    y: 200,
+    vy: 0,
+    vx: 10,
+    r: 20
+  });
 }
