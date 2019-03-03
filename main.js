@@ -9,7 +9,10 @@ var ctx;
 var GRAVITY = 1;
 var VELOCITY = 10;
 var RADIUS = 2;
-var TIME_MULTIPLIER = 20;
+var TIME_MULTIPLIER = 2;
+
+var SliderValue = 0;
+
 var vector = {
   dotProduct: function (vector1, vector2) {
     var result = 0;
@@ -112,9 +115,9 @@ var circles = {
       this.vel.y = -this.vel.y;
     }
 
-    this.pos.x += (this.vel.x * deltatime) / 100;
-    this.pos.y += (this.vel.y * deltatime) / 100;
-    this.vel.y += (GRAVITY * deltatime) / 100;
+    this.pos.x += (this.vel.x * deltatime); 
+    this.pos.y += (this.vel.y * deltatime + GRAVITY * deltatime * deltatime / 2);
+    this.vel.y += (GRAVITY * deltatime);
   },
 
   collisionDetector: function () {
@@ -205,7 +208,7 @@ function drawLoop() {
   circles.collisionDetector();
   totalEnergy = 0;
   circles.arr.forEach(circle => {
-    totalEnergy += (circle.mass * circle.vel.lenghtSqr()) / 2;
+    totalEnergy += (circle.mass * circle.vel.lenghtSqr()) / 2 - circle.mass*GRAVITY*circle.pos.y;
     circle.move();
     ctx.beginPath();
     ctx.fillStyle = "#000000";
@@ -214,20 +217,46 @@ function drawLoop() {
   });
 }
 
+
+
 function initJS() {
+  canvasEl = document.getElementById("el");
+  mainTimer = setInterval(drawLoop, 20);
+  SliderValue = 300;
+  $("#slider-value").html(SliderValue);
+  resetScene();
 
   $(function () {
-    $("#slider").slider();
+    $("#slider").slider({
+      value: SliderValue,
+      min: 10,
+      max: 500,
+      step: 1
+    });
   });
 
-  mainTimer = setInterval(drawLoop, 20);
-  circles.arr = [];
-  canvasEl = document.getElementById("el");
-  ctx = canvasEl.getContext("2d");
-  for (let i = 0; i < 100; i++) {
-    circles.create();
+  $("#slider").on("slidechange", function (event, ui) {
+    SliderValue = $("#slider").slider("option", "value");
+    $("#slider-value").html(SliderValue);
+    resetScene();
+  });
+
+  $("#reset-button").click(function (event, ui) {
+    resetScene();
+  });
+
+  
   }
 
+  function resetScene() {
+    
+    circles.arr = [];
+    
+    ctx = canvasEl.getContext("2d");
+    for (let i = 0; i < SliderValue; i++) {
+      circles.create();
+    }
+  }
   // circles.create({
   //   x: 300,
   //   y: 238,
@@ -244,4 +273,3 @@ function initJS() {
   // });
 
 
-}
