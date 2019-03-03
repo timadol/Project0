@@ -126,8 +126,8 @@ var circles = {
         var temp1 = this.arr[i];
         var temp2 = this.arr[j];
         var vec = vector.subtract(temp1.pos, temp2.pos);
-        var distance = Math.sqrt(vec.lenghtSqr());
-        if (distance < temp1.r + temp2.r) {
+        var distance = vec.lenghtSqr();
+        if (distance < (temp1.r + temp2.r)*(temp1.r + temp2.r)) {
           this.collisionHandler(temp1, temp2);
         }
       }
