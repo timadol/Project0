@@ -15,7 +15,7 @@ var SliderValue = 0;
 
 var vector = {
   dotProduct: function (vector1, vector2) {
-    return vector1.x * vextor2.x + vector1.y * vextor2.y;
+    return vector1.x * vector2.x + vector1.y * vector2.y;
   },
 
   multyply: function (vector, a) {
@@ -40,7 +40,7 @@ var vector = {
   },
 
   lenghtSqr: function () {
-    return dotProduct(this,this);
+    return vector.dotProduct(this,this);
   },
   normalize: function () {
     var lenght = Math.sqrt(this.lenghtSqr());
