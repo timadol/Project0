@@ -5,8 +5,16 @@
   <!-- <link rel="stylesheet" type="text/css" media="screen" href="main.css"> -->
   <script src="main.js"></script>
   <title>My first page</title>
+
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="/resources/demos/style.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
 </head>
 <body onload="initJS();">
-  <canvas id="el" height="480" width="640"></canvas>
+  <canvas id="el" height="480" width="640"></canvas><br>
+  <form><button onkeypress="initJS();">Reset</button></form><br>
+  <div id="slider"></div>
 </body>
 </html>
