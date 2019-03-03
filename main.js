@@ -8,63 +8,44 @@ var deltatime;
 var ctx;
 var GRAVITY = 1;
 var VELOCITY = 10;
-var RADIUS = 2;
+var RADIUS = 1;
 var TIME_MULTIPLIER = 2;
 
 var SliderValue = 0;
 
 var vector = {
   dotProduct: function (vector1, vector2) {
-    var result = 0;
-    for (i in vector1) {
-      if (vector1.hasOwnProperty(i)) {
-        result += vector1[i] * vector2[i];
-      }
-    }
-    return result;
+    return vector1.x * vextor2.x + vector1.y * vextor2.y;
   },
 
   multyply: function (vector, a) {
     var result = Object.create(vector);
-    for (i in vector) {
-      if (vector.hasOwnProperty(i)) {
-        result[i] = vector[i] * a;
-      }
-    }
+    result.x = vector.x * a;
+    result.y = vector.y * a;
     return result;
   },
 
   summ: function (vector1, vector2) {
     var result = Object.create(vector);
-    for (i in vector1) {
-      if (vector1.hasOwnProperty(i)) {
-        result[i] = vector1[i] + vector2[i];
-      }
-    }
+    result.x = vector1.x + vector2.x;
+    result.y = vector1.y + vector2.y;
     return result;
   },
 
   subtract: function (vector1, vector2) {
     var result = Object.create(vector);
-    for (i in vector1) {
-      if (vector1.hasOwnProperty(i)) {
-        result[i] = vector1[i] - vector2[i];
-      }
-    }
+    result.x = vector1.x - vector2.x;
+    result.y = vector1.y - vector2.y;
     return result;
   },
 
   lenghtSqr: function () {
-    return vector.dotProduct(this, this);
+    return dotProduct(this,this);
   },
   normalize: function () {
     var lenght = Math.sqrt(this.lenghtSqr());
-    for (i in this) {
-      if (this.hasOwnProperty(i)) {
-        this[i] = this[i] / lenght;
-      }
-    }
-    console.log(this.lenghtSqr());
+    this.x /= lenght;
+    this.y /= lenght;
   }
 };
 var circles = {
@@ -115,7 +96,7 @@ var circles = {
       this.vel.y = -this.vel.y;
     }
 
-    this.pos.x += (this.vel.x * deltatime); 
+    this.pos.x += (this.vel.x * deltatime);
     this.pos.y += (this.vel.y * deltatime + GRAVITY * deltatime * deltatime / 2);
     this.vel.y += (GRAVITY * deltatime);
   },
@@ -127,7 +108,7 @@ var circles = {
         var temp2 = this.arr[j];
         var vec = vector.subtract(temp1.pos, temp2.pos);
         var distance = vec.lenghtSqr();
-        if (distance < (temp1.r + temp2.r)*(temp1.r + temp2.r)) {
+        if (distance < (temp1.r + temp2.r) * (temp1.r + temp2.r)) {
           this.collisionHandler(temp1, temp2);
         }
       }
@@ -208,7 +189,12 @@ function drawLoop() {
   circles.collisionDetector();
   totalEnergy = 0;
   circles.arr.forEach(circle => {
-    totalEnergy += (circle.mass * circle.vel.lenghtSqr()) / 2 - circle.mass*GRAVITY*circle.pos.y;
+
+    var kinectic = (circle.mass * circle.vel.lenghtSqr()) / 2;
+    var potential = -circle.mass * GRAVITY * circle.pos.y;
+    var tempEng = kinectic + potential;
+    
+    totalEnergy += tempEng;
     circle.move();
     ctx.beginPath();
     ctx.fillStyle = "#000000";
@@ -230,7 +216,7 @@ function initJS() {
     $("#slider").slider({
       value: SliderValue,
       min: 10,
-      max: 500,
+      max: 5000,
       step: 1
     });
   });
@@ -245,31 +231,29 @@ function initJS() {
     resetScene();
   });
 
-  
+
+}
+
+function resetScene() {
+
+  circles.arr = [];
+
+  ctx = canvasEl.getContext("2d");
+  for (let i = 0; i < SliderValue; i++) {
+    circles.create();
   }
-
-  function resetScene() {
-    
-    circles.arr = [];
-    
-    ctx = canvasEl.getContext("2d");
-    for (let i = 0; i < SliderValue; i++) {
-      circles.create();
-    }
-  }
-  // circles.create({
-  //   x: 300,
-  //   y: 238,
-  //   vy: 0,
-  //   vx: -10,
-  //   r: 20
-  // });
-  // circles.create({
-  //   x: 20,
-  //   y: 200,
-  //   vy: 0,
-  //   vx: 10,
-  //   r: 20
-  // });
-
-
+}
+// circles.create({
+//   x: 300,
+//   y: 238,
+//   vy: 0,
+//   vx: -10,
+//   r: 20
+// });
+// circles.create({
+//   x: 20,
+//   y: 200,
+//   vy: 0,
+//   vx: 10,
+//   r: 20
+// });
