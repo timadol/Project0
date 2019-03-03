@@ -1,17 +1,31 @@
 var mainTimer;
 var totalEnergy;
+var totalKineticEnergy;
 
 var canvasEl;
 var now = new Date();
 var then = new Date();
 var deltatime;
 var ctx;
-var GRAVITY = 1;
+var gravity = 1;
 var VELOCITY = 10;
-var RADIUS = 1;
-var TIME_MULTIPLIER = 2;
+var radius = 2;
+var TIME_MULTIPLIER = 1 / 2;
+var K_BOLCMAN = 1.38064852e-38;
 
 var SliderValue = 0;
+
+function rgbToHex(R, G, B) {
+  return "#" + toHex(R) + toHex(G) + toHex(B)
+}
+
+function toHex(n) {
+  n = parseInt(n, 10);
+  if (isNaN(n)) return "00";
+  n = Math.max(0, Math.min(n, 255));
+  return "0123456789ABCDEF".charAt((n - n % 16) / 16) +
+    "0123456789ABCDEF".charAt(n % 16);
+}
 
 var vector = {
   dotProduct: function (vector1, vector2) {
@@ -40,7 +54,7 @@ var vector = {
   },
 
   lenghtSqr: function () {
-    return vector.dotProduct(this,this);
+    return vector.dotProduct(this, this);
   },
   normalize: function () {
     var lenght = Math.sqrt(this.lenghtSqr());
@@ -52,7 +66,7 @@ var circles = {
   arr: [],
   draw: function () {
     ctx.beginPath();
-    ctx.fillStyle = "#000000";
+    ctx.fillStyle = this.backgroundColor;
     ctx.arc(this.pos.x, this.pos.y, this.r, 0, 2 * Math.PI, true);
     ctx.fill();
     ctx.closePath();
@@ -69,7 +83,7 @@ var circles = {
       circle.vel.y = specs.vy;
       circle.r = specs.r;
     } else {
-      circle.r = Math.random() * RADIUS * 2 + RADIUS;
+      circle.r = Math.random() * radius * 2 + radius;
       circle.pos.x =
         Math.random() * (ctx.canvas.width - 2 * circle.r) + circle.r;
       circle.pos.y =
@@ -78,7 +92,7 @@ var circles = {
       circle.vel.y = Math.random() * VELOCITY * 2 - VELOCITY;
     }
     circle.mass = Math.PI * Math.pow(circle.r, 2);
-    circle.justColidedWith = NaN;
+    circle.backgroundColor = rgbToHex(Math.round(Math.random() * 100), Math.round(Math.random() * 100 + 155), Math.round(Math.random() * 100 + 155))
     this.arr.push(circle);
   },
 
@@ -97,8 +111,8 @@ var circles = {
     }
 
     this.pos.x += (this.vel.x * deltatime);
-    this.pos.y += (this.vel.y * deltatime + GRAVITY * deltatime * deltatime / 2);
-    this.vel.y += (GRAVITY * deltatime);
+    this.pos.y += (this.vel.y * deltatime + gravity * deltatime * deltatime / 2);
+    this.vel.y += (gravity * deltatime);
   },
 
   collisionDetector: function () {
@@ -106,8 +120,9 @@ var circles = {
       for (let j = i + 1; j < this.arr.length; j++) {
         var temp1 = this.arr[i];
         var temp2 = this.arr[j];
-        var vec = vector.subtract(temp1.pos, temp2.pos);
-        var distance = vec.lenghtSqr();
+        var deltaX = (temp1.pos.x - temp2.pos.x);
+        var deltaY = (temp1.pos.y - temp2.pos.y);
+        var distance = deltaX * deltaX + deltaY * deltaY;
         if (distance < (temp1.r + temp2.r) * (temp1.r + temp2.r)) {
           this.collisionHandler(temp1, temp2);
         }
@@ -178,28 +193,28 @@ function drawLoop() {
   deltatime = TIME_MULTIPLIER;
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, canvasEl.width, canvasEl.height);
-  // Вывод отладочной информации
-  ctx.fillStyle = "#000000";
-  ctx.fillText("Энергия: " + Math.round(totalEnergy), 5, 10);
-  ctx.fillText("Кол-во: " + circles.arr.length, 5, 20);
-  ctx.fillText("FPS: " + Math.round(1000 / (then - now)), 5, 30);
+
 
   // 
   ctx.strokeRect(0, 0, canvasEl.width, canvasEl.height);
   circles.collisionDetector();
   totalEnergy = 0;
+  totalKineticEnergy = 0;
   circles.arr.forEach(circle => {
 
     var kinectic = (circle.mass * circle.vel.lenghtSqr()) / 2;
-    var potential = -circle.mass * GRAVITY * circle.pos.y;
+    var potential = -circle.mass * gravity * circle.pos.y;
     var tempEng = kinectic + potential;
-    
+    totalKineticEnergy += kinectic;
     totalEnergy += tempEng;
     circle.move();
-    ctx.beginPath();
+    circle.draw();
+    // Вывод отладочной информации
     ctx.fillStyle = "#000000";
-    ctx.arc(circle.pos.x, circle.pos.y, circle.r, 0, 2 * Math.PI, true);
-    ctx.fill();
+    ctx.fillText("Энергия: " + Math.round(totalEnergy), 5, 10);
+    ctx.fillText("Кол-во: " + circles.arr.length, 5, 20);
+    ctx.fillText("FPS: " + Math.round(1000 / (then - now)), 5, 30);
+    ctx.fillText("T: " + Math.round(totalKineticEnergy / (10 * SliderValue)), 5, 40);
   });
 }
 
@@ -209,22 +224,47 @@ function initJS() {
   canvasEl = document.getElementById("el");
   mainTimer = setInterval(drawLoop, 20);
   SliderValue = 300;
-  $("#slider-value").html(SliderValue);
+  $("#countSlider-value").html(SliderValue);
   resetScene();
 
   $(function () {
-    $("#slider").slider({
+    $("#countSlider").slider({
       value: SliderValue,
       min: 10,
       max: 5000,
       step: 1
     });
   });
+  $(function () {
+    $("#radiusSlider").slider({
+      value: radius,
+      min: 0.5,
+      max: 5,
+      step: 0.01
+    });
+  });
+  $(function () {
+    $("#gravitySlider").slider({
+      value: gravity,
+      min: 0,
+      max: 5,
+      step: 1 / 50
+    });
+  });
 
-  $("#slider").on("slidechange", function (event, ui) {
-    SliderValue = $("#slider").slider("option", "value");
-    $("#slider-value").html(SliderValue);
+  $("#countSlider").on("slidechange", function (event, ui) {
+    SliderValue = $("#countSlider").slider("option", "value");
+    $("#countSlider-value").html(SliderValue);
     resetScene();
+  });
+  $("#radiusSlider").on("slidechange", function (event, ui) {
+    radius = $("#radiusSlider").slider("option", "value");
+    $("#radiusSlider-value").html(radius);
+    resetScene();
+  });
+  $("#gravitySlider").on("slidechange", function (event, ui) {
+    gravity = $("#gravitySlider").slider("option", "value");
+    $("#gravitySlider-value").html(gravity);;
   });
 
   $("#reset-button").click(function (event, ui) {

@@ -4,13 +4,13 @@ canvas {
     padding: 5px;
 }
 
-#slider{
+.slider{
     width: 300px;
     margin-left: 5px;
     display: inline-block;
 }
 
-#slider-value{
+.slider-value{
     border: 1px solid rgb(0, 0, 0);
     /* padding-top: 5px; */
     /* margin-top: -10px; */
@@ -24,6 +24,7 @@ canvas {
     border-radius: 2px;
     display: inline-block;
     margin: 0 0 5px 0;
+    padding: 5px;
 }
 #reset-button:hover{
     background: rgb(92, 91, 91);
