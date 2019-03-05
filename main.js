@@ -13,7 +13,7 @@ var radius = 0.5;
 var TIME_MULTIPLIER = 1 / 2;
 var K_BOLCMAN = 1.38064852e-38;
 
-var SliderValue = 4000;
+var SliderValue = 5000;
 
 function rgbToHex(R, G, B) {
   return "#" + toHex(R) + toHex(G) + toHex(B);
