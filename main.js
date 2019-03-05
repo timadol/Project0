@@ -1,19 +1,23 @@
+//debug info
 var mainTimer;
 var totalEnergy;
 var totalKineticEnergy;
-
+//defaults
+var radius = 2;
+var mass = 10;
+var SliderValue = 5000;
+var gravity = 0.2;
+var SliderValue = 2500;
+//constants
+var VELOCITY = 10;
+var TIME_MULTIPLIER = 1 / 2;
+var K_BOLCMAN = 1.38064852e-38;
+//globals
 var canvasEl;
 var now = new Date();
 var then = new Date();
 var deltatime;
 var ctx;
-var gravity = 0.2;
-var VELOCITY = 10;
-var radius = 0.5;
-var TIME_MULTIPLIER = 1 / 2;
-var K_BOLCMAN = 1.38064852e-38;
-
-var SliderValue = 5000;
 
 function rgbToHex(R, G, B) {
   return "#" + toHex(R) + toHex(G) + toHex(B);
@@ -85,7 +89,7 @@ var circles = {
       circle.vel.y = specs.vy;
       circle.r = specs.r;
     } else {
-      circle.r = Math.random() * radius * 2 + radius;
+      circle.r = radius;
       circle.pos.x =
         Math.random() * (ctx.canvas.width - 2 * circle.r) + circle.r;
       circle.pos.y =
@@ -93,11 +97,13 @@ var circles = {
       circle.vel.x = Math.random() * VELOCITY * 2 - VELOCITY;
       circle.vel.y = Math.random() * VELOCITY * 2 - VELOCITY;
     }
-    circle.mass = Math.PI * Math.pow(circle.r, 2);
+    circle.mass = Math.random() * mass * 9 + mass;
+    var massMax = 10*mass
+    var massMin = mass;
     circle.backgroundColor = rgbToHex(
-      Math.round(((circle.r / 3) * radius - 1) * 100 + 155),
-      Math.round(((circle.r / 3) * radius - 1) * 100 + 155),
-      Math.round(((circle.r / 3) * radius - 1) * 100 + 155)
+      Math.round((1-circle.mass/massMax)*255),
+      0,
+      Math.round((circle.mass/massMax)*255)
     );
     this.arr.push(circle);
   },
