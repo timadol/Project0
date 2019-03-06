@@ -18,6 +18,7 @@ var now = new Date();
 var then = new Date();
 var deltatime;
 var ctx;
+var operationCount = 0;
 
 function rgbToHex(R, G, B) {
   return "#" + toHex(R) + toHex(G) + toHex(B);
@@ -70,6 +71,21 @@ var vector = {
 };
 var circles = {
   arr: [],
+  compare: function(a, b) {
+    operationCount++;
+    return a.pos.y - a.r - (b.pos.y - b.r);
+  },
+  find: function(element, arr) {
+    operationCount++;
+    middleIndex = Math.trunc(arr.length / 2);
+    middleElem = arr[middleIndex];
+    if (middleIndex == 0) return 0;
+    if (middleElem.pos.y - middleElem.r > element)
+      return this.find(element, arr.slice(0, middleIndex));
+    if (middleElem.pos.y - middleElem.r < element)
+      return middleIndex + this.find(element, arr.slice(0, middleIndex));
+    return middleIndex;
+  },
   draw: function() {
     ctx.beginPath();
     ctx.fillStyle = this.backgroundColor;
@@ -98,12 +114,12 @@ var circles = {
       circle.vel.y = Math.random() * VELOCITY * 2 - VELOCITY;
     }
     circle.mass = Math.random() * mass * 9 + mass;
-    var massMax = 10*mass
+    var massMax = 10 * mass;
     var massMin = mass;
     circle.backgroundColor = rgbToHex(
-      Math.round((1-circle.mass/massMax)*255),
+      Math.round((1 - circle.mass / massMax) * 255),
       0,
-      Math.round((circle.mass/massMax)*255)
+      Math.round((circle.mass / massMax) * 255)
     );
     this.arr.push(circle);
   },
@@ -129,10 +145,14 @@ var circles = {
   },
 
   collisionDetector: function() {
+    this.arr.sort(this.compare);
     for (let i = 0; i < this.arr.length; i++) {
-      for (let j = i + 1; j < this.arr.length; j++) {
-        var temp1 = this.arr[i];
-        var temp2 = this.arr[j];
+      var temp1 = this.arr[i];
+      var sliceIndex = this.find(temp1.pos.y + temp1.r, this.arr);
+      var sliceArr = this.arr.slice(i + 1, sliceIndex);
+      for (let j = 0; j < sliceArr.length; j++) {
+        var temp2 = sliceArr[j];
+        operationCount++;
         var deltaX = Math.abs(temp1.pos.x - temp2.pos.x);
         var deltaY = Math.abs(temp1.pos.y - temp2.pos.y);
         if (deltaX < temp1.r + temp2.r && deltaY < temp1.r + temp2.r) {
@@ -206,12 +226,14 @@ function drawLoop() {
   then = new Date();
   deltatime = TIME_MULTIPLIER;
   ctx.fillStyle = "#ffffff";
+  operationCount =0;
   ctx.fillRect(0, 0, canvasEl.width, canvasEl.height);
 
   //
   ctx.strokeRect(0, 0, canvasEl.width, canvasEl.height);
   circles.collisionDetector();
   totalEnergy = 0;
+  
   totalKineticEnergy = 0;
   circles.arr.forEach(circle => {
     var kinectic = (circle.mass * circle.vel.lenghtSqr()) / 2;
@@ -225,13 +247,15 @@ function drawLoop() {
   // Вывод отладочной информации
   ctx.fillStyle = "#000000";
   ctx.fillText("Энергия: " + Math.round(totalEnergy), 5, 10);
-  ctx.fillText("Кол-во: " + circles.arr.length, 5, 20);
-  ctx.fillText("FPS: " + Math.round(1000 / (then - now)), 5, 30);
   ctx.fillText(
     "T: " + Math.round(totalKineticEnergy / (10 * SliderValue)),
     5,
-    40
+    420
   );
+  ctx.fillText("Кол-во: " + circles.arr.length, 5, 30);
+  ctx.fillText("FPS: " + Math.round(1000 / (then - now)), 5, 40);
+  ctx.fillText("Operations: " + operationCount, 5, 50);
+  
 }
 
 function initJS() {
