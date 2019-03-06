@@ -18,6 +18,7 @@ var now = new Date();
 var then = new Date();
 var deltatime;
 var ctx;
+var operationCount = 0;
 
 function rgbToHex(R, G, B) {
   return "#" + toHex(R) + toHex(G) + toHex(B);
@@ -135,8 +136,10 @@ var circles = {
         var temp2 = this.arr[j];
         var deltaX = Math.abs(temp1.pos.x - temp2.pos.x);
         var deltaY = Math.abs(temp1.pos.y - temp2.pos.y);
+        operationCount++
         if (deltaX < temp1.r + temp2.r && deltaY < temp1.r + temp2.r) {
           var distance = deltaX * deltaX + deltaY * deltaY;
+          
           if (distance < (temp1.r + temp2.r) * (temp1.r + temp2.r)) {
             this.collisionHandler(temp1, temp2);
           }
@@ -210,6 +213,7 @@ function drawLoop() {
 
   //
   ctx.strokeRect(0, 0, canvasEl.width, canvasEl.height);
+  operationCount = 0;
   circles.collisionDetector();
   totalEnergy = 0;
   totalKineticEnergy = 0;
@@ -225,13 +229,15 @@ function drawLoop() {
   // Вывод отладочной информации
   ctx.fillStyle = "#000000";
   ctx.fillText("Энергия: " + Math.round(totalEnergy), 5, 10);
-  ctx.fillText("Кол-во: " + circles.arr.length, 5, 20);
-  ctx.fillText("FPS: " + Math.round(1000 / (then - now)), 5, 30);
   ctx.fillText(
     "T: " + Math.round(totalKineticEnergy / (10 * SliderValue)),
     5,
-    40
+    20
   );
+  ctx.fillText("Кол-во: " + circles.arr.length, 5, 30);
+  ctx.fillText("FPS: " + Math.round(1000 / (then - now)), 5, 40);
+  ctx.fillText("Операций: " + operationCount, 5, 50);
+  
 }
 
 function initJS() {
