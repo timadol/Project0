@@ -250,7 +250,7 @@ function drawLoop() {
   ctx.fillText(
     "T: " + Math.round(totalKineticEnergy / (10 * SliderValue)),
     5,
-    420
+    20
   );
   ctx.fillText("Кол-во: " + circles.arr.length, 5, 30);
   ctx.fillText("FPS: " + Math.round(1000 / (then - now)), 5, 40);
