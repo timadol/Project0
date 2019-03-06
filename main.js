@@ -7,7 +7,7 @@ var radius = 2;
 var mass = 10;
 var SliderValue = 5000;
 var gravity = 0.2;
-var SliderValue = 2500;
+var SliderValue = 10000;
 //constants
 var VELOCITY = 10;
 var TIME_MULTIPLIER = 1 / 2;
@@ -268,7 +268,7 @@ function initJS() {
     $("#countSlider").slider({
       value: SliderValue,
       min: 10,
-      max: 5000,
+      max: 10000,
       step: 1
     });
   });
