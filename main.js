@@ -7,7 +7,6 @@ var radius = 2;
 var mass = 10;
 var SliderValue = 5000;
 var gravity = 0.2;
-var SliderValue = 10000;
 //constants
 var VELOCITY = 10;
 var TIME_MULTIPLIER = 1 / 2;
@@ -83,7 +82,7 @@ var circles = {
     if (middleElem.pos.y - middleElem.r > element)
       return this.find(element, arr.slice(0, middleIndex));
     if (middleElem.pos.y - middleElem.r < element)
-      return middleIndex + this.find(element, arr.slice(0, middleIndex));
+      return middleIndex + this.find(element, arr.slice(middleIndex, arr.lenght));
     return middleIndex;
   },
   draw: function() {
@@ -149,9 +148,8 @@ var circles = {
     for (let i = 0; i < this.arr.length; i++) {
       var temp1 = this.arr[i];
       var sliceIndex = this.find(temp1.pos.y + temp1.r, this.arr);
-      var sliceArr = this.arr.slice(i + 1, sliceIndex);
-      for (let j = 0; j < sliceArr.length; j++) {
-        var temp2 = sliceArr[j];
+      for (let j = i+1; j < sliceIndex; j++) {
+        var temp2 = this.arr[j];
         operationCount++;
         var deltaX = Math.abs(temp1.pos.x - temp2.pos.x);
         var deltaY = Math.abs(temp1.pos.y - temp2.pos.y);
