@@ -88,7 +88,7 @@ var circles = {
   draw: function() {
     ctx.beginPath();
     ctx.fillStyle = this.backgroundColor;
-    ctx.arc(this.pos.x, this.pos.y, this.r, 0, 2 * Math.PI, true);
+    ctx.arc(Math.round(this.pos.x), Math.round(this.pos.y), Math.round(this.r), 0, 2 * Math.PI, true);
     ctx.fill();
     ctx.closePath();
   },
