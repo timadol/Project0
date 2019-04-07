@@ -1,17 +1,23 @@
-//debug info
+/*
+ * @Author: Timofey Dolgunichev
+ * @Last Modified by: Kirill Dolgunichev
+ * @Last Modified time: 2019-04-07 23:55:23
+ */
+
+// debug info
 var mainTimer;
 var totalEnergy;
 var totalKineticEnergy;
-//defaults
+// defaults
 var radius = 2;
 var mass = 10;
 var SliderValue = 5000;
 var gravity = 0.2;
-//constants
+// constants
 var VELOCITY = 10;
 var TIME_MULTIPLIER = 1 / 2;
 var K_BOLCMAN = 1.38064852e-38;
-//globals
+// globals
 var canvasEl;
 var now = new Date();
 var then = new Date();
@@ -19,18 +25,15 @@ var deltatime;
 var ctx;
 var operationCount = 0;
 
+/**
+ * Convert a RGB value to a hexadecimal value
+ * @param {number} R The red.
+ * @param {number} G The second number.
+ * @param {number} B The second number.
+ * @return {string} RGB color representation in HEX format
+ */
 function rgbToHex(R, G, B) {
-  return "#" + toHex(R) + toHex(G) + toHex(B);
-}
-
-function toHex(n) {
-  n = parseInt(n, 10);
-  if (isNaN(n)) return "00";
-  n = Math.max(0, Math.min(n, 255));
-  return (
-    "0123456789ABCDEF".charAt((n - (n % 16)) / 16) +
-    "0123456789ABCDEF".charAt(n % 16)
-  );
+  return '#' + ((1 << 24) + (R << 16) + (G << 8) + B).toString(16).slice(1);
 }
 
 var vector = {
@@ -39,21 +42,21 @@ var vector = {
   },
 
   multyply: function(vector, a) {
-    var result = Object.create(vector);
+    let result = Object.create(vector);
     result.x = vector.x * a;
     result.y = vector.y * a;
     return result;
   },
 
   summ: function(vector1, vector2) {
-    var result = Object.create(vector);
+    let result = Object.create(vector);
     result.x = vector1.x + vector2.x;
     result.y = vector1.y + vector2.y;
     return result;
   },
 
   subtract: function(vector1, vector2) {
-    var result = Object.create(vector);
+    let result = Object.create(vector);
     result.x = vector1.x - vector2.x;
     result.y = vector1.y - vector2.y;
     return result;
@@ -63,10 +66,10 @@ var vector = {
     return vector.dotProduct(this, this);
   },
   normalize: function() {
-    var lenght = Math.sqrt(this.lenghtSqr());
+    let lenght = Math.sqrt(this.lenghtSqr());
     this.x /= lenght;
     this.y /= lenght;
-  }
+  },
 };
 var circles = {
   arr: [],
@@ -80,9 +83,9 @@ var circles = {
     middleElem = arr[middleIndex];
     if (middleIndex == 0) return 0;
     if (middleElem.pos.y - middleElem.r > element)
-      return this.find(element, arr.slice(0, middleIndex));
+      {return this.find(element, arr.slice(0, middleIndex));}
     if (middleElem.pos.y - middleElem.r < element)
-      return middleIndex + this.find(element, arr.slice(middleIndex, arr.lenght));
+      {return middleIndex + this.find(element, arr.slice(middleIndex, arr.lenght));}
     return middleIndex;
   },
   draw: function() {
@@ -94,7 +97,7 @@ var circles = {
   },
 
   create: function(specs) {
-    var circle = Object.create(circles);
+    let circle = Object.create(circles);
     circle.pos = Object.create(vector);
     circle.vel = Object.create(vector);
     if (specs) {
@@ -113,12 +116,12 @@ var circles = {
       circle.vel.y = Math.random() * VELOCITY * 2 - VELOCITY;
     }
     circle.mass = Math.random() * mass * 9 + mass;
-    var massMax = 10 * mass;
-    var massMin = mass;
+    let massMax = 10 * mass;
+    let massMin = mass;
     circle.backgroundColor = rgbToHex(
-      Math.round((1 - circle.mass / massMax) * 255),
-      0,
-      Math.round((circle.mass / massMax) * 255)
+        Math.round((1 - circle.mass / massMax) * 255),
+        0,
+        Math.round((circle.mass / massMax) * 255)
     );
     this.arr.push(circle);
   },
@@ -146,15 +149,15 @@ var circles = {
   collisionDetector: function() {
     this.arr.sort(this.compare);
     for (let i = 0; i < this.arr.length; i++) {
-      var temp1 = this.arr[i];
-      var sliceIndex = this.find(temp1.pos.y + temp1.r, this.arr);
+      let temp1 = this.arr[i];
+      let sliceIndex = this.find(temp1.pos.y + temp1.r, this.arr);
       for (let j = i+1; j < sliceIndex; j++) {
-        var temp2 = this.arr[j];
+        let temp2 = this.arr[j];
         operationCount++;
-        var deltaX = Math.abs(temp1.pos.x - temp2.pos.x);
-        var deltaY = Math.abs(temp1.pos.y - temp2.pos.y);
+        let deltaX = Math.abs(temp1.pos.x - temp2.pos.x);
+        let deltaY = Math.abs(temp1.pos.y - temp2.pos.y);
         if (deltaX < temp1.r + temp2.r && deltaY < temp1.r + temp2.r) {
-          var distance = deltaX * deltaX + deltaY * deltaY;
+          let distance = deltaX * deltaX + deltaY * deltaY;
           if (distance < (temp1.r + temp2.r) * (temp1.r + temp2.r)) {
             this.collisionHandler(temp1, temp2);
           }
@@ -164,66 +167,66 @@ var circles = {
   },
 
   collisionHandler: function(circle1, circle2) {
-    var normalVect = Object.create(vector);
+    let normalVect = Object.create(vector);
     normalVect = vector.subtract(circle1.pos, circle2.pos);
-    var distance = Math.sqrt(normalVect.lenghtSqr());
+    let distance = Math.sqrt(normalVect.lenghtSqr());
     normalVect.normalize();
 
-    //overlap resolving
+    // overlap resolving
     circle1.pos = vector.summ(
-      circle1.pos,
-      vector.multyply(
-        normalVect,
-        (-(distance - circle1.r - circle2.r - 1) * circle1.mass) /
+        circle1.pos,
+        vector.multyply(
+            normalVect,
+            (-(distance - circle1.r - circle2.r - 1) * circle1.mass) /
           (circle1.mass + circle2.mass)
-      )
+        )
     );
     circle2.pos = vector.summ(
-      circle2.pos,
-      vector.multyply(
-        normalVect,
-        ((distance - circle1.r - circle2.r - 1) * circle2.mass) /
+        circle2.pos,
+        vector.multyply(
+            normalVect,
+            ((distance - circle1.r - circle2.r - 1) * circle2.mass) /
           (circle1.mass + circle2.mass)
-      )
+        )
     );
 
-    var normalVel1 = Object.create(vector);
+    let normalVel1 = Object.create(vector);
     normalVel1 = vector.multyply(
-      normalVect,
-      vector.dotProduct(circle1.vel, normalVect)
+        normalVect,
+        vector.dotProduct(circle1.vel, normalVect)
     );
 
-    var normalVel2 = Object.create(vector);
+    let normalVel2 = Object.create(vector);
     normalVel2 = vector.multyply(
-      normalVect,
-      vector.dotProduct(circle2.vel, normalVect)
+        normalVect,
+        vector.dotProduct(circle2.vel, normalVect)
     );
 
     circle1.vel = vector.subtract(circle1.vel, normalVel1);
     circle2.vel = vector.subtract(circle2.vel, normalVel2);
 
-    var vel1 = vector.dotProduct(normalVel1, normalVect);
-    var vel2 = vector.dotProduct(normalVel2, normalVect);
+    let vel1 = vector.dotProduct(normalVel1, normalVect);
+    let vel2 = vector.dotProduct(normalVel2, normalVect);
 
-    //Проекции скоростей
-    var totalMass = circle1.mass + circle2.mass;
-    var diffMass = circle1.mass - circle2.mass;
-    var vel11 = (2 * circle2.mass * vel2 + diffMass * vel1) / totalMass;
-    var vel21 = (2 * circle1.mass * vel1 - diffMass * vel2) / totalMass;
+    // Проекции скоростей
+    let totalMass = circle1.mass + circle2.mass;
+    let diffMass = circle1.mass - circle2.mass;
+    let vel11 = (2 * circle2.mass * vel2 + diffMass * vel1) / totalMass;
+    let vel21 = (2 * circle1.mass * vel1 - diffMass * vel2) / totalMass;
 
     normalVel1 = vector.multyply(normalVect, vel11);
     normalVel2 = vector.multyply(normalVect, vel21);
 
     circle1.vel = vector.summ(circle1.vel, normalVel1);
     circle2.vel = vector.summ(circle2.vel, normalVel2);
-  }
+  },
 };
 
 function drawLoop() {
   now = then;
   then = new Date();
   deltatime = TIME_MULTIPLIER;
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = '#ffffff';
   operationCount =0;
   ctx.fillRect(0, 0, canvasEl.width, canvasEl.height);
 
@@ -231,78 +234,78 @@ function drawLoop() {
   ctx.strokeRect(0, 0, canvasEl.width, canvasEl.height);
   circles.collisionDetector();
   totalEnergy = 0;
-  
+
   totalKineticEnergy = 0;
-  circles.arr.forEach(circle => {
-    var kinectic = (circle.mass * circle.vel.lenghtSqr()) / 2;
-    var potential = -circle.mass * gravity * circle.pos.y;
-    var tempEng = kinectic + potential;
+  circles.arr.forEach((circle) => {
+    let kinectic = (circle.mass * circle.vel.lenghtSqr()) / 2;
+    let potential = -circle.mass * gravity * circle.pos.y;
+    let tempEng = kinectic + potential;
     totalKineticEnergy += kinectic;
     totalEnergy += tempEng;
     circle.move();
     circle.draw();
   });
   // Вывод отладочной информации
-  ctx.fillStyle = "#000000";
-  ctx.fillText("Энергия: " + Math.round(totalEnergy), 5, 10);
+  ctx.fillStyle = '#000000';
+  ctx.fillText('Энергия: ' + Math.round(totalEnergy), 5, 10);
   ctx.fillText(
-    "T: " + Math.round(totalKineticEnergy / (10 * SliderValue)),
-    5,
-    20
+      'T: ' + Math.round(totalKineticEnergy / (10 * SliderValue)),
+      5,
+      20
   );
-  ctx.fillText("Кол-во: " + circles.arr.length, 5, 30);
-  ctx.fillText("FPS: " + Math.round(1000 / (then - now)), 5, 40);
-  ctx.fillText("Operations: " + operationCount, 5, 50);
-  
+  ctx.fillText('Кол-во: ' + circles.arr.length, 5, 30);
+  ctx.fillText('FPS: ' + Math.round(1000 / (then - now)), 5, 40);
+  ctx.fillText('Operations: ' + operationCount, 5, 50);
+
 }
 
 function initJS() {
-  canvasEl = document.getElementById("el");
+  canvasEl = document.getElementById('el');
   mainTimer = setInterval(drawLoop, 20);
-  $("#countSlider-value").html(SliderValue);
+  $('#countSlider-value').html(SliderValue);
   resetScene();
 
   $(function() {
-    $("#countSlider").slider({
+    $('#countSlider').slider({
       value: SliderValue,
       min: 10,
       max: 10000,
-      step: 1
+      step: 1,
     });
   });
   $(function() {
-    $("#radiusSlider").slider({
+    $('#radiusSlider').slider({
       value: radius,
       min: 0.5,
       max: 5,
-      step: 0.01
+      step: 0.01,
     });
   });
   $(function() {
-    $("#gravitySlider").slider({
+    $('#gravitySlider').slider({
       value: gravity,
       min: 0,
       max: 5,
-      step: 1 / 50
+      step: 1 / 50,
     });
   });
 
-  $("#countSlider").on("slidechange", function(event, ui) {
-    SliderValue = $("#countSlider").slider("option", "value");
-    $("#countSlider-value").html(SliderValue);
+  $('#countSlider').on('slidechange', function(event, ui) {
+    SliderValue = $('#countSlider').slider('option', 'value');
+    $('#countSlider-value').html(SliderValue);
     resetScene();
   });
-  $("#radiusSlider").on("slidechange", function(event, ui) {
-    radius = $("#radiusSlider").slider("option", "value");
-    $("#radiusSlider-value").html(radius);
+  $('#radiusSlider').on('slidechange', function(event, ui) {
+    radius = $('#radiusSlider').slider('option', 'value');
+    $('#radiusSlider-value').html(radius);
     resetScene();
   });
-  $("#gravitySlider").on("slidechange", function(event, ui) {
-    gravity = $("#gravitySlider").slider("option", "value");
-    $("#gravitySlider-value").html(gravity);
+  $('#gravitySlider').on('slidechange', function(event, ui) {
+    gravity = $('#gravitySlider').slider('option', 'value');
+    $('#gravitySlider-value').html(gravity);
   });
 
-  $("#reset-button").click(function(event, ui) {
+  $('#reset-button').click(function(event, ui) {
     resetScene();
   });
 }
@@ -310,7 +313,7 @@ function initJS() {
 function resetScene() {
   circles.arr = [];
 
-  ctx = canvasEl.getContext("2d");
+  ctx = canvasEl.getContext('2d');
   for (let i = 0; i < SliderValue; i++) {
     circles.create();
   }
