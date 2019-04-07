@@ -1,1 +1,2 @@
-perf prof
+.vscode
+*.ps1
