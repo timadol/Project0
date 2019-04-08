@@ -14,19 +14,49 @@
   </head>
 
   <body>
-    <canvas id="el" height="480" width="640"></canvas><br />
-    <button id="reset-button">Reset</button>
-    <br />
-    <div class="slider" id="countSlider"></div>
-    <div class="slider-value" id="countSlider-value">000</div>
-    <br />
-    <div class="slider" id="radiusSlider"></div>
-    <div class="slider-value" id="radiusSlider-value">000</div>
-    <br />
-    <div class="slider" id="gravitySlider"></div>
-    <div class="slider-value" id="gravitySlider-value">000</div>
-    <br />
-    <div class="slider" id="trailSlider"></div>
-    <div class="trail-value" id="trailSlider-value">000</div>
+    <div class="control-container">
+      <div id="wrapper">
+        <h1>Collision Code JS Demo</h1>
+        <canvas id="el" height="480" width="640"></canvas><br />
+        <table class="control-table">
+          <colgroup>
+            <col style="width: 120px; text-align:right" />
+            <col style="width: 220px" />
+            <col style="width: 50px; text-align:left" />
+          </colgroup>
+          <tr>
+            <td></td>
+            <td>
+              <div class="button-container">
+                <div id="reset-button">Reset</div>
+              </div>
+            </td>
+            <td></td>
+          </tr>
+          <tr>
+            <td style="text-align:right">Number of bodies:</td>
+            <td><div class="slider" id="countSlider"></div></td>
+            <td><div class="slider-value" id="countSlider-value">000</div></td>
+          </tr>
+          <tr>
+            <td style="text-align:right">Radius:</td>
+            <td><div class="slider" id="radiusSlider"></div></td>
+            <td><div class="slider-value" id="radiusSlider-value">000</div></td>
+          </tr>
+          <tr>
+            <td style="text-align:right">Gravity effect:</td>
+            <td><div class="slider" id="gravitySlider"></div></td>
+            <td>
+              <div class="slider-value" id="gravitySlider-value">000</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align:right">Trail effect:</td>
+            <td><div class="slider" id="trailSlider"></div></td>
+            <td><div class="slider-value" id="trailSlider-value">000</div></td>
+          </tr>
+        </table>
+      </div>
+    </div>
   </body>
 </html>
