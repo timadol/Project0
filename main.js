@@ -1,7 +1,7 @@
 /*
  * @Author: Timofey Dolgunichev
  * @Last Modified by: Kirill Dolgunichev
- * @Last Modified time: 2019-04-08 03:18:52
+ * @Last Modified time: 2019-04-08 05:25:14
  */
 
 // debug info
@@ -9,15 +9,15 @@
 let totalEnergy;
 let totalKineticEnergy;
 // defaults
-let radius = 1;
+let radius = 2;
 const mass = 10;
-let objectQty = 1500;
-let gravity = 0.2;
-let trail = 90;
+let objectQty = 1000;
+let gravity = 0.1;
+let trail = 120;
 // constants
 const cFillBaseColor = '#ffffff';
 const VELOCITY = 10;
-const TIME_MULTIPLIER = 1 / 2;
+const TIME_MULTIPLIER = 1/2;
 // const Kb = 1.38064852e-38;
 const PI2 = 2 * Math.PI;
 // globals
@@ -30,9 +30,9 @@ let operationCount = 0;
 
 /**
  * Convert a RGB value to a hexadecimal value
- * @param {int} R The red value.
- * @param {int} G The green value.
- * @param {int} B The blue value.
+ * @param {int} R Red value.
+ * @param {int} G Green value.
+ * @param {int} B Blue value.
  * @return {string} RGB color representation in HEX format
  */
 function rgbToHex(R, G, B) {
@@ -97,10 +97,7 @@ const circles = {
   draw: function() {
     ctx.beginPath();
     ctx.fillStyle = this.backgroundColor;
-    ctx.arc(Math.round(this.pos.x),
-        Math.round(this.pos.y),
-        Math.round(this.r),
-        0, PI2, true);
+    ctx.arc(this.pos.x, this.pos.y, this.r, 0, PI2, true);
     ctx.fill();
     ctx.closePath();
   },
@@ -128,9 +125,9 @@ const circles = {
     const massMax = 10 * mass;
     // const massMin = mass;
     circle.backgroundColor = rgbToHex(
-        Math.round((1 - circle.mass / massMax) * 255),
-        0,
-        Math.round((circle.mass / massMax) * 255)
+        Math.round((1 - circle.mass / massMax) * 250),
+        20,
+        Math.round((circle.mass / massMax) * 210)
     );
     this.arr.push(circle);
   },
@@ -257,18 +254,7 @@ function drawLoop() {
     circle.draw();
   });
   // Вывод отладочной информации
-  const textSize = 12;
-  ctx.fillStyle = '#00ffff99';
-  ctx.fillRect(2, 1, 120, 50);
-  ctx.fillStyle = '#8b0000ff';
-  ctx.font = textSize + 'px Arial';
-  ctx.fillText('Энергия: ' + Math.round(totalEnergy), 5, 10);
-  ctx.fillText( 'T: ' + Math.round(totalKineticEnergy / (10 * objectQty)),
-      5, 20);
-  ctx.fillText('Кол-во: ' + circles.arr.length, 5, 30);
-  ctx.fillText('FPS: ' + Math.round(1000 / (then - now)),
-      5, 40);
-  ctx.fillText('Operations: ' + operationCount, 5, 50);
+  debugOverlay();
 }
 /**
  * @param {object} _ev Nothing.
@@ -343,6 +329,7 @@ window.onload = function(_ev) {
     resetScene();
   });
 };
+
 /**
  * Clear scene.
  */
@@ -362,4 +349,18 @@ function clearScene(trailValue) {
   const fillTransparency = trailValue.toString(16);
   ctx.fillStyle = cFillBaseColor + fillTransparency;
   ctx.fillRect(0, 0, canvasEl.width, canvasEl.height);
+}
+/**
+ * Show debug overlay frame.
+ */
+function debugOverlay() {
+  ctx.fillStyle = '#9fa8da99';
+  ctx.fillRect(2, 2, 120, 54);
+  ctx.fillStyle = '#880e4fff';
+  ctx.font = '12px Arial';
+  ctx.fillText('Энергия: ' + Math.round(totalEnergy), 5, 14);
+  ctx.fillText('T: ' + Math.round(totalKineticEnergy / (10 * objectQty)), 5, 24);
+  ctx.fillText('Кол-во: ' + circles.arr.length, 5, 34);
+  ctx.fillText('FPS: ' + Math.round(1000 / (then - now)), 5, 44);
+  ctx.fillText('Operations: ' + operationCount, 5, 54);
 }
