@@ -1,31 +1,71 @@
+div.control-container {
+    height: 400px;
+    position: relative;
+}
+div.control-container #wrapper {
+    margin: 0;
+    /* background: yellow; */
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%);
+    background: rgb(227, 242, 253);
+    border: 1px solid rgb(140, 158, 255);
+}
+h1{
+    color: rgb(136, 14, 79);
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+}
 canvas {
-    border: 1px solid rgb(46, 30, 30);
-    background: rgb(192, 190, 199);
+    border: 2px solid  rgb(140, 158, 255);
+    /* background: rgb(159, 168, 218); */
+    /* padding: 10px; */
+    margin: 10px;
+}
+
+.control-table {
+    table-layout: fixed;
+    width: 600px;
+}
+
+.control-table td{
+    font-size:18px;
     padding: 5px;
+    color: rgb(136, 14, 79)
 }
 
-.slider{
-    width: 300px;
-    margin-left: 5px;
-    display: inline-block;
-}
-
-.slider-value{
-    border: 1px solid rgb(0, 0, 0);
-    /* padding-top: 5px; */
-    /* margin-top: -10px; */
+.slider {
+    width: 310px;
     margin-left: 10px;
     display: inline-block;
-    font-size: 11pt;
 }
 
-#reset-button{
+.slider-value {
+    /*border: 1px solid rgb(0, 0, 0);*/
+    /* padding-top: 5px; */
+    /* margin-top: -10px; */
+    /* margin-left: 10px;
+    display: inline-block;
+    font-size: 11pt; */
+}
+
+#reset-button {
     border: 1px solid rgb(46, 30, 30);
+    background: rgb(204, 204, 204);
     border-radius: 2px;
     display: inline-block;
     margin: 0 0 5px 0;
     padding: 5px;
+
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
 }
-#reset-button:hover{
-    background: rgb(92, 91, 91);
+
+#reset-button:hover {
+    background: rgb(239, 108, 0);
 }

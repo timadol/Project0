@@ -9,7 +9,7 @@
             "type": "chrome",
             "request": "launch",
             "name": "Launch Chrome",
-            "url": "file:///C:/Users/timad/Documents/Project0/index.html",
+            "url": "file:///${workspaceFolder}/index.html",
             "webRoot": "${workspaceFolder}"
         }
     ]
